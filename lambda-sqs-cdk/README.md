@@ -1,9 +1,9 @@
-# Amazon SQS to AWS Lambda
+# Amazon sqs to AWS Lambda
 
-This pattern contains a sample AWS CDK stack to create a Lambda Function, a SQS Topic and the IAM permissions required to run the application.
-SQS invokes the Lambda function when new messages are available. When messages are sent to the SQS topic, they are delivered as a JSON event payload to the Lambda function.
+This pattern contains a sample AWS CDK stack to create a Lambda Function, an SQS Queue and the IAM permissions required to run the application.
+Lambda function sends a message to the SQS queue as a JSON payload. 
 
-Learn more about this pattern at Serverless Land Patterns: https://serverlessland.com/patterns/sqs-lambda-cdk
+Learn more about this pattern at Serverless Land Patterns: https://serverlessland.com/patterns/lambda-sqs-cdk
 
 Important: this application uses various AWS services and there are costs associated with these services after the Free Tier usage - please see the [AWS Pricing page](https://aws.amazon.com/pricing/) for details. You are responsible for any AWS costs incurred. No warranty is implied in this example.
 
@@ -26,7 +26,7 @@ Important: this application uses various AWS services and there are costs associ
     ```
 2. Change directory to the pattern directory:
     ```sh
-    cd sqs-lambda-cdk/src
+    cd lambda-sqs-cdk/src
     ```
 
 3. Create and activate the project's virtual environment. This allows the project's dependencies to be installed locally in the project folder, instead of globally. Note that if you have multiple versions of Python installed, where the `python` command references Python 2.x, then you can reference Python 3.x by using the `python3` command. You can check which version of Python is being referenced by running the command `python --version` or `python3 --version`
@@ -56,26 +56,23 @@ The CDK app deploys the resources and the IAM permissions required to run the ap
 
 Use the [AWS CLI](https://aws.amazon.com/cli/) to send a message to the SQS topic and observe the event delivered to the Lambda function:
 
-1. Send the SQS message:
+1. Invoke the Lambda function to publish a message to the SQS queue:
 
 ```bash
-aws sqs publish --topic-arn ENTER_SQS_TOPIC_ARN_FROM_OUTPUT --subject testSubject --message "Hello world - SQS to Lambda"
+aws lambda invoke --function-name ENTER_YOUR_FUNCTION_NAME response.json
 ```
-
-2. Retrieve the logs from the Lambda function:
+2. Retrieve the message from the SQS queue, using the queue URL from the AWS SAM deployment outputs:
 ```bash
-sam logs -n ENTER_HANDLER_FUNCTION_NAME_FROM_OUTPUT
+aws sqs receive-message --queue-url ENTER_YOUR_QUEUE_URL
 ```
 
 ## Cleanup
  
-1. Run the given command to delete the resources that were created. It might take some time for the CloudFormation stack to get deleted.
-
-```sh
-cdk destroy
-```
-
-2. Confirm the stack has been deleted
+1. Delete the stack
+    ```bash
+    aws cloudformation delete-stack --stack-name STACK_NAME
+    ```
+1. Confirm the stack has been deleted
     ```bash
     aws cloudformation list-stacks --query "StackSummaries[?contains(StackName,'STACK_NAME')].StackStatus"
     ```

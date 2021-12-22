@@ -12,4 +12,3 @@ def main(event, context):
 	    MessageBody=json.dumps(message)
 	)
 	print(response)
-    return

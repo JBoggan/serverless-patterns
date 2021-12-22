@@ -4,14 +4,13 @@ from aws_cdk import (
     aws_logs as logs,
     aws_sqs as sqs,
     core as cdk,
+    aws_iam as iam
 )
 
 
 class LambdaSQSStack(cdk.Stack):
     def __init__(self, app: cdk.App, id: str) -> None:
         super().__init__(app, id)
-
-
 
         # SQS queue
         queue = sqs.Queue(self, 'lambda-to-sqs-test')
@@ -23,6 +22,13 @@ class LambdaSQSStack(cdk.Stack):
                                     handler="handler.main",
                                     timeout=cdk.Duration.seconds(10),
                                     environment={'QUEUE_URL': queue.queue_url})
+
+        queue_policy = sqs.QueuePolicy(self, "LambdaQueuePolicy", queues=[queue])
+        queue_policy.document.add_statements(iam.PolicyStatement(
+            actions=["sqs:SendMessage"],
+            principals=[lambdaFn.role],
+            resources=[queue.queue_arn]
+            ))
 
         # Set Lambda Logs Retention and Removal Policy
         logs.LogGroup(
